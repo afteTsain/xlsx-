@@ -1,0 +1,31 @@
+Sub FilesMEG()
+    Dim FileName As String, wb As Workbook
+    Dim Erow As Long, fn As String, FilePath As String
+    Dim Wj_Odj, Wjlx As String, i As Integer '对话框返回文件列表；可选文件类型；循环计数器
+    On Error Resume Next  '容错语句，防止用户取消选择对话框
+    fn = "D:\测试数据" '输出目录
+    Rem 可选文件类型
+    Wjlx = "Excel 97-03版文件(*.Xls),*.Xls,Excel 07版文件(*.Xlsx),*.Xlsx,Excel文件(*.Xl*),*.Xl*"
+    Rem 启用打开对话框
+    Wj_Odj = Application.GetOpenFilename(FileFilter:=Wjlx, FilterIndex:=3, Title:="打开", MultiSelect:=True)
+    If Err.Number <> 0 Then Exit Sub  '检测到用户取消选择对话框则退出过程
+       Rem 关闭刷新及提示
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+        Rem 对输出文件夹进行处理
+    FilePath = Dir("D:\测试数据" & "\xlsx", vbDirectory)
+    If FilePath = "" Then '判断输出目录是否存在
+        MkDir (fn & "\xlsx")
+    End If
+    Kill fn & "\xlsx\*.xlsx" '删除输出目录下所有的工作簿
+        Rem 循环获取选中对象的具体文件信息
+    For i = 1 To UBound(Wj_Odj)
+        Set wb = GetObject(Wj_Odj(i)) '使用GetObject函数打开指定文件并赋值给Wb变量
+        FilePath = fn & "\xlsx\" & wb.Name
+        wb.SaveCopyAs FilePath
+        wb.Close False   '关闭工作簿并不保存
+   Next i
+   Application.DisplayAlerts = True
+   Application.ScreenUpdating = True
+   MsgBox "共处理了" & i & "个工作薄下的全部工作表。如下：" & Chr(13) & "", vbInformation, "提示"
+End Sub
